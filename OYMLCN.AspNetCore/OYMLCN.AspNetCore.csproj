@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <Company>广东佰群网络科技股份有限公司</Company>
+    <Authors>VicBilibily欧阳敏岚</Authors>
+    <Description>ASP.Net Core 扩展
+1.类Controller继承自源类型
+加入参数 IsQcloudCDNRequest、RequestSourceIP、IsAuthenticated、UserName、UserId
+加入方法 UserSignIn、UserSignOut、UserSignInWithJWT、UserSignOutWithJWT
+加入辅助 RefererPath、RequestHost、RequestPath、RequestUserAgent、RequestQueryParams
+2.配置扩展
+services.AddSessionAndCookie、app.UseQcloudForwardedHeaders
+app.UseSessionAndAuthentication、app.UseJsonResultForStatusCodeAndException
+app.UseJsonResultForStatusCodeAndException
+3.独立模块
+ViewRender、EmailSender
+4.TagHelper（附带部分适用于LayUI的辅助扩展）
+辅助类 CDNImageHelper
+TagHelperOutput扩展方法 GetAttribute、RemoveAttribute、AddClass
+5、扩展模块
+JsonWebToken 构造器JwtTokenBuilder 中间件JWTInCookieMiddleware 配置services.AddJsonWebTokenAuthentication、app.UseJWTAuthenticationWithCookie
+EntityFramework扩展：RemoveOne、RemoveOneAndSave</Description>
+    <Version>1.0.2</Version>
+</PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netcoreapp2.0\OYMLCN.AspNetCore.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp2.0\OYMLCN.AspNetCore.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
+    <PackageReference Include="OYMLCN.Extension" Version="1.1.4" />
+  </ItemGroup>
+
+</Project>
