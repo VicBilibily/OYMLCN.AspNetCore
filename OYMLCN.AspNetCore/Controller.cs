@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Headers;
 
 namespace OYMLCN.AspNetCore
 {
@@ -95,7 +96,7 @@ namespace OYMLCN.AspNetCore
         /// <summary>
         /// 上一路径
         /// </summary>
-        public string RefererPath => (Request.Headers as FrameRequestHeaders).HeaderReferer.FirstOrDefault()?.ToUri()?.AbsolutePath;
+        public string RefererPath => (Request.Headers as RequestHeaders).Referer?.AbsolutePath;
         /// <summary>
         /// 请求域名
         /// </summary>
