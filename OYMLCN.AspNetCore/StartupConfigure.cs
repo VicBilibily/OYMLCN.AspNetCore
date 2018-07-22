@@ -89,16 +89,24 @@ namespace Microsoft.AspNetCore.Builder
         /// <returns></returns>
         public static IApplicationBuilder UseSessionAndAuthentication(this IApplicationBuilder app) => app.UseSession().UseAuthentication();
         /// <summary>
+        /// 注入处理管道，使JWT身份信息验证模块支持包含指定tokenName名称的Cookies/UrlQuery/Form表单的值用于身份验证
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="tokenName"></param>
+        /// <returns></returns>
+        public static IApplicationBuilder UseJWTAuthenticationWithCookieAndQueryAndForm(this IApplicationBuilder app, string tokenName = "access_token") =>
+            app.UseMiddleware<JWTMiddleware>(tokenName).UseAuthentication();
+        /// <summary>
         /// 注入Cookie中的JWT身份信息验证模块
         /// </summary>
         /// <param name="app"></param>
         /// <param name="cookieName"></param>
         /// <returns></returns>
-        public static IApplicationBuilder UseJWTAuthenticationWithCookie(this IApplicationBuilder app, string cookieName = "access_token") =>
-            app.UseMiddleware<JWTInCookieMiddleware>(cookieName).UseAuthentication();
+        [Obsolete("已过时，请使用替代方法 UseJWTAuthenticationWithCookieAndQueryAndForm ", true)]
+        public static IApplicationBuilder UseJWTAuthenticationWithCookie(this IApplicationBuilder app, string cookieName = "access_token") => throw new NotSupportedException();
 
         /// <summary>
-        /// 返回异常Json数据信息
+        /// 返回异常Json数据信息，适用于纯接口服务
         /// </summary>
         /// <param name="app"></param>
         /// <returns></returns>

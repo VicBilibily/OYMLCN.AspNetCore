@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <Company>欧阳敏岚工作室</Company>
     <Authors>VicBilibily欧阳敏岚</Authors>
-    <Version>1.1.0</Version>
+    <Version>1.1.1-beta1</Version>
     <Description>ASP.Net Core 扩展
 1.类Controller继承自源类型
 加入参数 IsQcloudCDNRequest、RequestSourceIP、IsAuthenticated、UserName、UserId

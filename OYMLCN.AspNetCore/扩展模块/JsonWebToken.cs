@@ -117,23 +117,37 @@ namespace OYMLCN.AspNetCore
         }
 
     }
-    public class JWTInCookieMiddleware
+    internal class JWTMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly string _cookieName;
+        private readonly string tokenName;
 
-        public JWTInCookieMiddleware(RequestDelegate next, string cookieName = "access_token")
+        public JWTMiddleware(RequestDelegate next, string tokenName = "access_token")
         {
             _next = next;
-            _cookieName = cookieName;
+            this.tokenName = tokenName;
         }
 
         public async Task Invoke(HttpContext context)
         {
-            var cookie = context.Request.Cookies[_cookieName];
-            if (!context.Request.Headers.ContainsKey("Authorization") && cookie != null)
-                context.Request.Headers.Append("Authorization", "Bearer " + cookie);
-
+            if (!context.Request.Headers.ContainsKey("Authorization"))
+            {
+                var cookie = context.Request.Cookies[tokenName];
+                if (cookie != null)
+                    context.Request.Headers.Append("Authorization", "Bearer " + cookie);
+                else
+                {
+                    string token = context.Request.Query[tokenName];
+                    if (token.IsNullOrWhiteSpace())
+                        try
+                        {
+                            token = context.Request.Form[tokenName];
+                        }
+                        catch { }
+                    if (token != null)
+                        context.Request.Headers.Append("Authorization", "Bearer " + token);
+                }
+            }
             await _next.Invoke(context);
         }
     }
