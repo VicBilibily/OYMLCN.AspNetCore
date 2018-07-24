@@ -4,9 +4,9 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <Company>欧阳敏岚工作室</Company>
     <Authors>VicBilibily欧阳敏岚</Authors>
-    <Version>1.1.1-beta1</Version>
-    <Description>ASP.Net Core 扩展
-1.类Controller继承自源类型
+    <Version>1.2.0</Version>
+    <Description>ASP.Net Core 扩展</Description>
+    <PackageReleaseNotes>1.类Controller继承自源类型
 加入参数 IsQcloudCDNRequest、RequestSourceIP、IsAuthenticated、UserName、UserId
 加入方法 UserSignIn、UserSignOut、UserSignInWithJWT、UserSignOutWithJWT
 加入辅助 RefererPath、RequestHost、RequestPath、RequestUserAgent、RequestQueryParams
@@ -21,7 +21,14 @@ ViewRender、EmailSender
 TagHelperOutput扩展方法 GetAttribute、RemoveAttribute、AddClass
 5、扩展模块
 JsonWebToken 构造器JwtTokenBuilder 中间件JWTInCookieMiddleware 配置services.AddJsonWebTokenAuthentication、app.UseJWTAuthenticationWithCookie
-EntityFramework扩展：RemoveOne、RemoveOneAndSave</Description>
+EntityFramework扩展：RemoveOne、RemoveOneAndSave
+5、第三方SDK扩展模块（基于OYMLCN.Extension已有的第三方SDK）
+Aliyun、TencentCloud</PackageReleaseNotes>
+    <PackageLicenseUrl>http://www.wtfpl.net/</PackageLicenseUrl>
+    <Copyright>base OYMLCN with WTFPL</Copyright>
+    <PackageProjectUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
 </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,10 +41,7 @@ EntityFramework扩展：RemoveOne、RemoveOneAndSave</Description>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="OYMLCN.Extension" Version="1.1.8" />
+    <PackageReference Include="OYMLCN.Extension" Version="1.3.0" />
   </ItemGroup>
 
 </Project>
