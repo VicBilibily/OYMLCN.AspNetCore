@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace OYMLCN
+namespace OYMLCN.Extensions
 {
     /// <summary>
     /// EntityFrameworkExtensions
