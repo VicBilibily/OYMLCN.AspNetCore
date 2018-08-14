@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <Company>欧阳敏岚工作室</Company>
     <Authors>VicBilibily欧阳敏岚</Authors>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Description>ASP.Net Core 扩展</Description>
     <PackageReleaseNotes>1.类Controller继承自源类型
 加入参数 IsQcloudCDNRequest、RequestSourceIP、IsAuthenticated、UserName、UserId
@@ -29,6 +29,9 @@ Aliyun、TencentCloud</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore</PackageProjectUrl>
     <RepositoryUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>VicBilibily欧阳敏岚.pfx</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
 </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -40,8 +43,8 @@ Aliyun、TencentCloud</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.1" />
-    <PackageReference Include="OYMLCN.Extension" Version="1.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.2" />
+    <PackageReference Include="OYMLCN.Extension" Version="1.4.1" />
   </ItemGroup>
 
 </Project>

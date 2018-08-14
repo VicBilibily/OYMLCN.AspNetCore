@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using OYMLCN;
+using OYMLCN.Extensions;
 
 namespace Microsoft.AspNetCore.Mvc.TagHelpers
 {

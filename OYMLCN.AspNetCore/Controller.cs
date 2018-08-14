@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
+using OYMLCN.Extensions;
 
 namespace OYMLCN.AspNetCore
 {
@@ -41,7 +42,7 @@ namespace OYMLCN.AspNetCore
         /// <summary>
         /// 登陆用户唯一标识
         /// </summary>
-        public long UserId => User.Claims.Where(d => d.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value.ConvertToNullableLong() ?? 0;
+        public long UserId => User.Claims.Where(d => d.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value.AsType().NullableLong ?? 0;
 
         /// <summary>
         /// 用户登陆

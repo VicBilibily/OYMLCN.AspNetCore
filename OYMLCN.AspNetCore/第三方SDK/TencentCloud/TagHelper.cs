@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
-using OYMLCN;
+using OYMLCN.Extensions;
 
 namespace Microsoft.AspNetCore.Mvc.TagHelpers
 {

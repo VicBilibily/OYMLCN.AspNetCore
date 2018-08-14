@@ -11,13 +11,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using OYMLCN.Extensions;
 
 namespace OYMLCN.AspNetCore
 {
     public static class JsonWebToken
     {
         public static SecurityKey CrateSecurityKey(string secret) =>
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret.EncodeToMD5()));
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret.AsEncrypt().MD5));
         public sealed class JwtToken
         {
             internal JwtToken(JwtSecurityToken token, int expires)
