@@ -96,15 +96,7 @@ namespace Microsoft.AspNetCore.Builder
         /// <returns></returns>
         public static IApplicationBuilder UseJWTAuthenticationWithCookieAndQueryAndForm(this IApplicationBuilder app, string tokenName = "access_token") =>
             app.UseMiddleware<JWTMiddleware>(tokenName).UseAuthentication();
-        /// <summary>
-        /// 注入Cookie中的JWT身份信息验证模块
-        /// </summary>
-        /// <param name="app"></param>
-        /// <param name="cookieName"></param>
-        /// <returns></returns>
-        [Obsolete("已过时，请使用替代方法 UseJWTAuthenticationWithCookieAndQueryAndForm ", true)]
-        public static IApplicationBuilder UseJWTAuthenticationWithCookie(this IApplicationBuilder app, string cookieName = "access_token") => throw new NotSupportedException();
-
+  
         /// <summary>
         /// 返回异常Json数据信息，适用于纯接口服务
         /// </summary>
