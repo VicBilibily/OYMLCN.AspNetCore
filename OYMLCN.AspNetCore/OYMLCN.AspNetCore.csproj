@@ -43,13 +43,14 @@ Aliyun、TencentCloud</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.2" />
-    <PackageReference Include="OYMLCN.Extension" Version="1.4.5" />
+    <Compile Remove="自建模块\**" />
+    <EmbeddedResource Remove="自建模块\**" />
+    <None Remove="自建模块\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="自建模块\JsonApi\" />
-    <Folder Include="自建模块\" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
+    <PackageReference Include="OYMLCN.Extension" Version="1.4.5" />
   </ItemGroup>
 
 </Project>
