@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <Company>欧阳敏岚工作室</Company>
     <Authors>VicBilibily欧阳敏岚</Authors>
-    <Version>1.2.2</Version>
+    <Version>1.3.0</Version>
     <Description>ASP.Net Core 扩展</Description>
     <PackageReleaseNotes>1.类Controller继承自源类型
 加入参数 IsQcloudCDNRequest、RequestSourceIP、IsAuthenticated、UserName、UserId
@@ -21,9 +21,7 @@ ViewRender、EmailSender
 TagHelperOutput扩展方法 GetAttribute、RemoveAttribute、AddClass
 5、扩展模块
 JsonWebToken 构造器JwtTokenBuilder 中间件JWTInCookieMiddleware 配置services.AddJsonWebTokenAuthentication、app.UseJWTAuthenticationWithCookie
-EntityFramework扩展：RemoveOne、RemoveOneAndSave
-5、第三方SDK扩展模块（基于OYMLCN.Extension已有的第三方SDK）
-Aliyun、TencentCloud</PackageReleaseNotes>
+EntityFramework扩展：RemoveOne、RemoveOneAndSave</PackageReleaseNotes>
     <PackageLicenseUrl>http://www.wtfpl.net/</PackageLicenseUrl>
     <Copyright>base OYMLCN with WTFPL</Copyright>
     <PackageProjectUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore</PackageProjectUrl>
@@ -35,22 +33,17 @@ Aliyun、TencentCloud</PackageReleaseNotes>
 </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netcoreapp2.1\OYMLCN.AspNetCore.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netcoreapp2.2\OYMLCN.AspNetCore.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netcoreapp2.1\OYMLCN.AspNetCore.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netcoreapp2.2\OYMLCN.AspNetCore.xml</DocumentationFile>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <Compile Remove="自建模块\**" />
-    <EmbeddedResource Remove="自建模块\**" />
-    <None Remove="自建模块\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
-    <PackageReference Include="OYMLCN.Extension" Version="1.4.5" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="OYMLCN.Extension" Version="2.0.2" />
+    <PackageReference Include="OYMLCN.Extension.Encrypt" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
