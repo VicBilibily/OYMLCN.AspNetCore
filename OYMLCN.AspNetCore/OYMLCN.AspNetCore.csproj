@@ -4,25 +4,9 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <Company>欧阳敏岚工作室</Company>
     <Authors>VicBilibily欧阳敏岚</Authors>
-    <Version>1.3.1</Version>
+    <Version>1.3.2</Version>
     <Description>ASP.Net Core 扩展</Description>
-    <PackageReleaseNotes>1.类Controller继承自源类型
-加入参数 IsQcloudCDNRequest、RequestSourceIP、IsAuthenticated、UserName、UserId
-加入方法 UserSignIn、UserSignOut、UserSignInWithJWT、UserSignOutWithJWT
-加入辅助 RefererPath、RequestHost、RequestPath、RequestUserAgent、RequestQueryParams
-2.配置扩展
-services.AddSessionAndCookie、app.UseQcloudForwardedHeaders
-app.UseSessionAndAuthentication、app.UseJsonResultForStatusCodeAndException
-app.UseJsonResultForStatusCodeAndException
-3.独立模块
-ViewRender、EmailSender
-4.TagHelper（附带部分适用于LayUI的辅助扩展）
-辅助类 CDNImageHelper
-TagHelperOutput扩展方法 GetAttribute、RemoveAttribute、AddClass
-5、扩展模块
-JsonWebToken 构造器JwtTokenBuilder 中间件JWTInCookieMiddleware 配置services.AddJsonWebTokenAuthentication、app.UseJWTAuthenticationWithCookie
-EntityFramework扩展：RemoveOne、RemoveOneAndSave</PackageReleaseNotes>
-    <PackageLicenseUrl>http://www.wtfpl.net/</PackageLicenseUrl>
+    <PackageReleaseNotes></PackageReleaseNotes>
     <Copyright>base OYMLCN with WTFPL</Copyright>
     <PackageProjectUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore</PackageProjectUrl>
     <RepositoryUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore.git</RepositoryUrl>
@@ -30,6 +14,9 @@ EntityFramework扩展：RemoveOne、RemoveOneAndSave</PackageReleaseNotes>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>VicBilibily欧阳敏岚.pfx</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -43,6 +30,13 @@ EntityFramework扩展：RemoveOne、RemoveOneAndSave</PackageReleaseNotes>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="OYMLCN.Extension" Version="2.0.2" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

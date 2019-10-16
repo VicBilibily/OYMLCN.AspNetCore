@@ -1,23 +1,30 @@
 #pragma warning disable CS1591 // 缺少对公共可见类型或成员的 XML 注释
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using OYMLCN.AspNetCore;
+using OYMLCN.Extensions;
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Linq;
-using System.Text;
-using Newtonsoft.Json;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using OYMLCN.Extensions;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace OYMLCN.AspNetCore
 {
     public static class JsonWebToken
     {
+        internal const string SecretKeyPath = "JWT:SecretKey";
+        internal const string IssuerPath = "JWT:Issuer";
+        internal const string AudiencePath = "JWT:Audience";
+        internal const string TokenNamePath = "JWT:Name";
+        internal const string TokenNameDefault = "access_token";
+
         internal static string Encoder<T>(this T encryptor, string str) where T : HashAlgorithm
         {
             var sha1bytes = Encoding.UTF8.GetBytes(str);
@@ -31,30 +38,44 @@ namespace OYMLCN.AspNetCore
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(MD5.Create().Encoder(secret)));
         public sealed class JwtToken
         {
-            internal JwtToken(JwtSecurityToken token, int expires)
+            internal JwtToken(JwtSecurityToken token, string key, int expires)
             {
                 this.token = new JwtSecurityTokenHandler().WriteToken(token);
+                this.key = key;
                 this.expires = expires;
             }
-
             [JsonIgnore]
             internal string token { get; private set; }
             [JsonIgnore]
             internal int expires { get; private set; }
 
+            public string key { get; private set; }
             public string access_token => token;
             public string refresh_token => Guid.NewGuid().ToString("N");
             public int expires_in => expires;
         }
         public sealed class JwtTokenBuilder
         {
+            private string tokenKey = TokenNameDefault;
             private SecurityKey securityKey = null;
-            private string subject = "";
-            private string issuer = "";
-            private string audience = "";
+            private string subject;
+            private string issuer;
+            private string audience;
             private Dictionary<string, string> claims = new Dictionary<string, string>();
             private int expiryInMinutes = 0;
 
+            public IConfiguration Configuration { get; set; }
+
+            /// <summary>
+            /// JsonWebToken 构造
+            /// </summary>
+            /// <param name="configuration">应用程序设置，需要在配置文件设置JWT->SecretKey/Issuer/Audience/Name</param>
+            /// <param name="subject">用户标识</param>
+            public JwtTokenBuilder(IConfiguration configuration, object subject) :
+                this(CrateSecurityKey(configuration.GetValue<string>(SecretKeyPath)), subject.ToString(), configuration.GetValue<string>(IssuerPath), configuration.GetValue<string>(AudiencePath))
+            {
+                this.tokenKey = configuration.GetValue<string>(TokenNamePath) ?? TokenNameDefault;
+            }
             /// <summary>
             /// JsonWebToken 构造
             /// </summary>
@@ -82,7 +103,7 @@ namespace OYMLCN.AspNetCore
 
             public JwtTokenBuilder AddClaim(string type, string value)
             {
-                this.claims.Add(type, value);
+                this.claims.AddOrUpdate(type, value);
                 return this;
             }
             public JwtTokenBuilder AddClaims(Dictionary<string, string> claims)
@@ -122,44 +143,8 @@ namespace OYMLCN.AspNetCore
                     signingCredentials: new SigningCredentials(
                         this.securityKey,
                         SecurityAlgorithms.HmacSha256));
-
-                return new JwtToken(token, expiryInMinutes == 0 ? -1 : expiryInMinutes * 60);
+                return new JwtToken(token, tokenKey, expiryInMinutes == 0 ? -1 : expiryInMinutes * 60);
             }
-        }
-
-    }
-    internal class JWTMiddleware
-    {
-        private readonly RequestDelegate _next;
-        private readonly string tokenName;
-
-        public JWTMiddleware(RequestDelegate next, string tokenName = "access_token")
-        {
-            _next = next;
-            this.tokenName = tokenName;
-        }
-
-        public async Task Invoke(HttpContext context)
-        {
-            if (!context.Request.Headers.ContainsKey("Authorization"))
-            {
-                var cookie = context.Request.Cookies[tokenName];
-                if (cookie != null)
-                    context.Request.Headers.Append("Authorization", "Bearer " + cookie);
-                else
-                {
-                    string token = context.Request.Query[tokenName];
-                    if (token.IsNullOrWhiteSpace())
-                        try
-                        {
-                            token = context.Request.Form[tokenName];
-                        }
-                        catch { }
-                    if (token != null)
-                        context.Request.Headers.Append("Authorization", "Bearer " + token);
-                }
-            }
-            await _next.Invoke(context);
         }
     }
 }
@@ -174,33 +159,65 @@ namespace Microsoft.Extensions.Configuration
     public static partial class StartupConfigureExtension
     {
         /// <summary>
-        /// 一句话配置JsonWebToken(JWT)身份验证
+        /// 配置JsonWebToken(JWT)身份验证
+        /// 需要在配置文件设置JWT->SecretKey/Issuer/Audience/Name
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services, IConfiguration configuration) =>
+            AddJsonWebTokenAuthentication(services,
+                configuration.GetValue<string>("JWT:SecretKey"),
+                configuration.GetValue<string>("JWT:Issuer"),
+                configuration.GetValue<string>("JWT:Audience"),
+                configuration.GetValue<string>("JWT:Name") ?? JsonWebToken.TokenNameDefault
+                );
+        /// <summary>
+        /// 配置JsonWebToken(JWT)身份验证
         /// 需在Configure中加入 app.UseAuthentication() 以使得登陆配置生效 
         /// </summary>
         /// <param name="services"></param>
         /// <param name="secret">密钥</param>
         /// <param name="issuer">信任签发者</param>
         /// <param name="audience">信任服务者</param>
+        /// <param name="name">Token名称</param>
         /// <param name="clockSkew">宽限时间/时间验证偏差（默认偏差5分钟）</param>
         /// <returns></returns>
-        public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services, string secret, string issuer, string audience, TimeSpan clockSkew = default(TimeSpan)) =>
-            AddJsonWebTokenAuthentication(services, OYMLCN.AspNetCore.JsonWebToken.CrateSecurityKey(secret), issuer, audience, clockSkew);
+        public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services, string secret, string issuer, string audience, string name = JsonWebToken.TokenNameDefault, TimeSpan clockSkew = default(TimeSpan)) =>
+            AddJsonWebTokenAuthentication(services, OYMLCN.AspNetCore.JsonWebToken.CrateSecurityKey(secret), issuer, audience, name, clockSkew);
         /// <summary>
-        /// 一句话配置JsonWebToken(JWT)身份验证
+        /// 配置JsonWebToken(JWT)身份验证
         /// 需在Configure中加入 app.UseAuthentication() 以使得登陆配置生效 
         /// </summary>
         /// <param name="services"></param>
         /// <param name="securityKey">密钥</param>
         /// <param name="issuer">信任签发者</param>
         /// <param name="audience">信任服务者</param>
+        /// <param name="name">Token名称</param>
         /// <param name="clockSkew">宽限时间/时间验证偏差（默认偏差5分钟）</param>
         /// <returns></returns>
-        public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services, SecurityKey securityKey, string issuer, string audience, TimeSpan clockSkew = default(TimeSpan))
+        public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services, SecurityKey securityKey, string issuer, string audience, string name = JsonWebToken.TokenNameDefault, TimeSpan clockSkew = default(TimeSpan))
         {
             services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
+                    options.Events = new JwtBearerEvents()
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            //仅未通过Header传入时才从其他方式获取
+                            if (context.Token.IsNullOrEmpty())
+                            {
+                                //首先尝试从Cookie中获取Token
+                                string token = context.Request.Cookies[name];
+                                //如果无，则尝试参数从中获取Token
+                                if (token.IsNullOrEmpty()) token = context.Request.Query[name];
+                                if (token.IsNotNullOrEmpty()) context.Token = token;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -211,9 +228,8 @@ namespace Microsoft.Extensions.Configuration
                         ValidIssuer = issuer,
                         ValidAudience = audience,
                         IssuerSigningKey = securityKey,
-
                     };
-                    if (clockSkew != default(TimeSpan))
+                    if (clockSkew != default)
                         options.TokenValidationParameters.ClockSkew = clockSkew;
                 });
             return services;

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
 using OYMLCN.Extensions;
+using Microsoft.Extensions.Configuration;
 
 namespace OYMLCN.AspNetCore
 {
@@ -79,19 +80,24 @@ namespace OYMLCN.AspNetCore
         /// 若要使用Cookie+JWT验证，需要在Startup中配置app.UseJWTAuthenticationWithCookie
         /// </summary>
         /// <param name="jwt"></param>
-        /// <param name="cookieName"></param>
         /// <param name="secureCookie"></param>
-        public void UserSignInWithJWT(JsonWebToken.JwtToken jwt, string cookieName = "access_token", bool secureCookie = true) =>
-            Response.Cookies.Append("access_token", jwt.access_token, new CookieOptions()
-            {
-                Secure = secureCookie,
-                HttpOnly = true
-            });
+        public void UserSignInWithJWT(JsonWebToken.JwtToken jwt, bool secureCookie = true, CookieOptions options = null)
+        {
+            options = options ?? options ?? new CookieOptions();
+            options.Secure = secureCookie;
+            options.HttpOnly = true;
+            HttpContext.Response.Cookies.Append(jwt.key, jwt.access_token, options);
+        }
         /// <summary>
         /// 注销登陆（删除Cookie中的JWT身份凭证）
         /// </summary>
-        /// <param name="cookieName"></param>
-        public void UserSignOutWithJWT(string cookieName = "access_token") => Response.Cookies.Delete(cookieName);
+        /// <param name="configuration"></param>
+        public void UserSignOutWithJWT(IConfiguration configuration) => Response.Cookies.Delete(configuration.GetValue<string>(JsonWebToken.TokenNamePath) ?? JsonWebToken.TokenNameDefault);
+        /// <summary>
+        /// 注销登陆（删除Cookie中的JWT身份凭证）
+        /// </summary>
+        /// <param name="tokenKey"></param>
+        public void UserSignOutWithJWT(string tokenKey = JsonWebToken.TokenNameDefault) => HttpContext.Response.Cookies.Delete(tokenKey);
 
 
         /// <summary>

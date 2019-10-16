@@ -8,6 +8,7 @@ using System.Text;
 using OYMLCN.Extensions;
 using System.Net;
 using OYMLCN.AspNetCore;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace Microsoft.Extensions.Configuration
 {
@@ -88,15 +89,7 @@ namespace Microsoft.AspNetCore.Builder
         /// <param name="app"></param>
         /// <returns></returns>
         public static IApplicationBuilder UseSessionAndAuthentication(this IApplicationBuilder app) => app.UseSession().UseAuthentication();
-        /// <summary>
-        /// 注入处理管道，使JWT身份信息验证模块支持包含指定tokenName名称的Cookies/UrlQuery/Form表单的值用于身份验证
-        /// </summary>
-        /// <param name="app"></param>
-        /// <param name="tokenName"></param>
-        /// <returns></returns>
-        public static IApplicationBuilder UseJWTAuthenticationWithCookieAndQueryAndForm(this IApplicationBuilder app, string tokenName = "access_token") =>
-            app.UseMiddleware<JWTMiddleware>(tokenName).UseAuthentication();
-  
+
         /// <summary>
         /// 返回异常Json数据信息，适用于纯接口服务
         /// </summary>
@@ -116,7 +109,7 @@ namespace Microsoft.AspNetCore.Builder
               {
                   config.Run(handler =>
                   {
-                      var err = handler.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+                      var err = handler.Features.Get<IExceptionHandlerFeature>();
                       handler.Response.StatusCode = 200;
                       handler.Response.ContentType = "application/json";
                       return handler.Response.WriteAsync(new
