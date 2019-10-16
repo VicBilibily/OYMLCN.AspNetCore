@@ -12,13 +12,23 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using OYMLCN.Extensions;
+using System.Security.Cryptography;
 
 namespace OYMLCN.AspNetCore
 {
     public static class JsonWebToken
     {
+        internal static string Encoder<T>(this T encryptor, string str) where T : HashAlgorithm
+        {
+            var sha1bytes = Encoding.UTF8.GetBytes(str);
+            byte[] resultHash = encryptor.ComputeHash(sha1bytes);
+            string sha1String = BitConverter.ToString(resultHash).ToLower();
+            sha1String = sha1String.Replace("-", "");
+            return sha1String;
+        }
+
         public static SecurityKey CrateSecurityKey(string secret) =>
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret.AsEncrypt().MD5));
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(MD5.Create().Encoder(secret)));
         public sealed class JwtToken
         {
             internal JwtToken(JwtSecurityToken token, int expires)
