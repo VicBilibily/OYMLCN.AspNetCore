@@ -21,6 +21,12 @@ EntityFramework扩展：RemoveOne、RemoveOneAndSave
 
 ### 通过配置使用JWT的说明
 
+0、如果你使用的netcoreapp版本为3.0，SDK不再内置JWT认证，需要手动引用JWT包。
+
+``` bash
+Install-Package Microsoft.AspNetCore.Authentication.JwtBearer -Version 3.0.0
+```
+
 1、在 `Startup` 中的 `ConfigureServices` 添加
 
 ``` c#
@@ -71,5 +77,5 @@ base.UserSignInWithJWT(token, false, options); // 调用此句写Cookies
 return access_token;
 ```
 
-6、用户退出时调用继承基类下的 `UserSignOutWithJWT` 即可
+6、用户退出时调用继承基类下的 `UserSignOutWithJWT` 即可清除用户Cookies
 

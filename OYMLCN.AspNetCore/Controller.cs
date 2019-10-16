@@ -81,6 +81,7 @@ namespace OYMLCN.AspNetCore
         /// </summary>
         /// <param name="jwt"></param>
         /// <param name="secureCookie"></param>
+        /// <param name="options"></param>
         public void UserSignInWithJWT(JsonWebToken.JwtToken jwt, bool secureCookie = true, CookieOptions options = null)
         {
             options = options ?? options ?? new CookieOptions();
