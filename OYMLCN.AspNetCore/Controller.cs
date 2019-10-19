@@ -151,11 +151,5 @@ namespace OYMLCN.AspNetCore
                 }
             }
         }
-
-        UrlHelper urlHelper;
-        /// <summary>
-        /// UrlHelper
-        /// </summary>
-        public UrlHelper UrlHelper => urlHelper ?? (urlHelper = new UrlHelper(ControllerContext));
     }
 }
