@@ -2,12 +2,15 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace OYMLCN.AspNetCore
@@ -15,59 +18,60 @@ namespace OYMLCN.AspNetCore
     /// <summary>
     /// 视图渲染
     /// </summary>
-    public class ViewRender
+    public class ViewRenderService
     {
-        readonly IRazorViewEngine _razorViewEngine;
-        readonly ITempDataProvider _tempDataProvider;
-        readonly IServiceProvider _serviceProvider;
-
+        IRazorViewEngine _viewEngine;
+        ITempDataProvider _tempDataProvider;
+        IHttpContextAccessor _httpContextAccessor;
         /// <summary>
         /// 视图渲染（请使用AddScoped注入方式调用，MVC框架会自动注入初始化参数）
         /// </summary>
-        /// <param name="razorViewEngine"></param>
+        /// <param name="viewEngine"></param>
         /// <param name="tempDataProvider"></param>
-        /// <param name="serviceProvider"></param>
-        public ViewRender(IRazorViewEngine razorViewEngine, ITempDataProvider tempDataProvider, IServiceProvider serviceProvider)
+        /// <param name="httpContextAccessor"></param>
+        public ViewRenderService(IRazorViewEngine viewEngine, ITempDataProvider tempDataProvider, IHttpContextAccessor httpContextAccessor)
         {
-            _razorViewEngine = razorViewEngine;
+            _viewEngine = viewEngine;
             _tempDataProvider = tempDataProvider;
-            _serviceProvider = serviceProvider;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         /// <summary>
-        /// 生成String
+        /// 渲染视图
         /// </summary>
-        /// <param name="viewName"></param>
+        /// <param name="viewPath"></param>
+        /// <returns></returns>
+        public string Render(string viewPath) => Render(viewPath, string.Empty);
+        /// <summary>
+        /// 渲染视图
+        /// </summary>
+        /// <typeparam name="TModel"></typeparam>
+        /// <param name="viewPath"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        public string RenderToString(string viewName, object model = null)
+        public string Render<TModel>(string viewPath, TModel model)
         {
-            var httpContext = new DefaultHttpContext { RequestServices = _serviceProvider };
-            var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+            var httpContext = _httpContextAccessor.HttpContext;
+            var viewEngineResult = _viewEngine.GetView("~/", viewPath, false);
+            var actionContext = new ActionContext(httpContext, httpContext.GetRouteData(), new ActionDescriptor());
+            if (!viewEngineResult.Success)
+                viewEngineResult = _viewEngine.FindView(actionContext, viewPath, false);
+            if (!viewEngineResult.Success)
+                throw new InvalidOperationException($"Couldn't find view {viewPath}");
 
-            using (var sw = new StringWriter())
+            var view = viewEngineResult.View;
+            using (var output = new StringWriter())
             {
-                var viewResult = _razorViewEngine.FindView(actionContext, viewName, false);
-
-                if (viewResult.View == null)
-                    throw new ArgumentNullException($"{viewName} 视图页找不到耶");
-
-                var viewDictionary = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
-                {
-                    Model = model
-                };
-
                 var viewContext = new ViewContext(
                     actionContext,
-                    viewResult.View,
-                    viewDictionary,
+                    view,
+                    new ViewDataDictionary<TModel>(new EmptyModelMetadataProvider(), new ModelStateDictionary()) { Model = model },
                     new TempDataDictionary(actionContext.HttpContext, _tempDataProvider),
-                    sw,
+                    output,
                     new HtmlHelperOptions()
                 );
-
-                viewResult.View.RenderAsync(viewContext).Wait();
-                return sw.ToString();
+                view.RenderAsync(viewContext).GetAwaiter().GetResult();
+                return output.ToString();
             }
         }
     }
