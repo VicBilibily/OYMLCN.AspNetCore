@@ -1,3 +1,4 @@
+#if NETCOREAPP2_1
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -71,3 +72,4 @@ namespace OYMLCN.AspNetCore
         }
     }
 }
+#endif

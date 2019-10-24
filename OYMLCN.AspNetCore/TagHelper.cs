@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Collections.Generic;
 using System.Linq;
 using OYMLCN.Extensions;
+using System;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Microsoft.AspNetCore.Mvc.TagHelpers
 {
@@ -78,6 +80,85 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
         }
     }
 
+#if NETCOREAPP3_0
+    [HtmlTargetElement("link", Attributes = "href,auto-use-minify")]
+    public class LinkAutoUseMinifyHelper : TagHelper
+    {
+        protected IWebHostEnvironment HostingEnvironment { get; }
+        public LinkAutoUseMinifyHelper(IWebHostEnvironment hostingEnvironment)
+        {
+            HostingEnvironment = hostingEnvironment;
+        }
+
+        [HtmlAttributeName("href")]
+        protected string Href { get; set; }
+        /// <summary>
+        /// 发布环境下将*.css更改为*.min.css
+        /// </summary>
+        [HtmlAttributeName("auto-use-minify")]
+        public bool? AutoUseMinify { get; set; }
+
+        public override void Process(TagHelperContext context, TagHelperOutput output)
+        {
+            if (AutoUseMinify == true && "Production".Equals(HostingEnvironment.EnvironmentName))
+            {
+                var href = output.Attributes["href"].Value as string;
+                var pathQuery = href.Split('?');
+                var path = pathQuery[0];
+                var dirs = path.Split('/');
+                var fileName = dirs.Last();
+                if (fileName.EndsWith(".min.css", StringComparison.OrdinalIgnoreCase) == false)
+                {
+                    fileName = fileName.Insert(fileName.LastIndexOf(".css", StringComparison.InvariantCulture), ".min");
+                    dirs[dirs.Length - 1] = fileName;
+                    pathQuery[0] = dirs.Join("/");
+                    href = pathQuery.Join("?");
+                    output.Attributes.SetAttribute("href", href);
+                }
+            }
+
+            base.Process(context, output);
+        }
+    }
+    [HtmlTargetElement("script", Attributes = "src,auto-use-minify")]
+    public class SrciptAutoUseMinifyHelper : TagHelper
+    {
+        protected IWebHostEnvironment HostingEnvironment { get; }
+        public SrciptAutoUseMinifyHelper(IWebHostEnvironment hostingEnvironment)
+        {
+            HostingEnvironment = hostingEnvironment;
+        }
+
+        [HtmlAttributeName("src")]
+        protected string Src { get; set; }
+        /// <summary>
+        /// 发布环境下将*.js更改为*.min.js
+        /// </summary>
+        [HtmlAttributeName("auto-use-minify")]
+        public bool? AutoUseMinify { get; set; }
+
+        public override void Process(TagHelperContext context, TagHelperOutput output)
+        {
+            if (AutoUseMinify == true && "Production".Equals(HostingEnvironment.EnvironmentName))
+            {
+                var href = output.Attributes["src"].Value as string;
+                var pathQuery = href.Split('?');
+                var path = pathQuery[0];
+                var dirs = path.Split('/');
+                var fileName = dirs.Last();
+                if (fileName.EndsWith(".min.js", StringComparison.OrdinalIgnoreCase) == false)
+                {
+                    fileName = fileName.Insert(fileName.LastIndexOf(".js", StringComparison.InvariantCulture), ".min");
+                    dirs[dirs.Length - 1] = fileName;
+                    pathQuery[0] = dirs.Join("/");
+                    href = pathQuery.Join("?");
+                    output.Attributes.SetAttribute("src", href);
+                }
+            }
+            base.Process(context, output);
+        }
+    }
+#endif
 }
 
 namespace OYMLCN.Extensions

@@ -1,3 +1,4 @@
+#if NETCOREAPP2_1
 using System;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -41,3 +42,4 @@ namespace OYMLCN.Extensions
         }
     }
 }
+#endif
