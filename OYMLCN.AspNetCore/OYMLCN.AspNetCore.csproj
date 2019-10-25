@@ -17,29 +17,15 @@
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)|$(Configuration)|$(Platform)'=='netcoreapp2.1|Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netcoreapp2.1\OYMLCN.AspNetCore.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)|$(Configuration)|$(Platform)'=='netcoreapp2.1|Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netcoreapp2.1\OYMLCN.AspNetCore.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)|$(Configuration)|$(Platform)'=='netcoreapp3.0|Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netcoreapp3.0\OYMLCN.AspNetCore.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)|$(Configuration)|$(Platform)'=='netcoreapp3.0|Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netcoreapp3.0\OYMLCN.AspNetCore.xml</DocumentationFile>
+    <DocumentationFile Condition="'$(TargetFramework)'=='netcoreapp2.1'">bin\xml\netcoreapp2.1\OYMLCN.AspNetCore.xml</DocumentationFile>
+    <DocumentationFile Condition="'$(TargetFramework)'=='netcoreapp3.0'">bin\xml\netcoreapp3.0\OYMLCN.AspNetCore.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OYMLCN.Extension" Version="2.0.2" />
+    <PackageReference Include="OYMLCN.Extension" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
   </ItemGroup>
@@ -49,10 +35,6 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\OYMLCN.Extension\OYMLCN.Extension\OYMLCN.Extension.csproj" />
   </ItemGroup>
 
 </Project>
