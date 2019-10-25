@@ -4,10 +4,10 @@
     <TargetFrameworks>netcoreapp2.1;netcoreapp3.0;</TargetFrameworks>
     <Company>欧阳敏岚工作室</Company>
     <Authors>VicBilibily欧阳敏岚</Authors>
-    <Version>1.3.3</Version>
+    <Version>1.3.4</Version>
     <Description>ASP.Net Core 扩展</Description>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <Copyright>base OYMLCN with WTFPL</Copyright>
+    <Copyright>The MIT License</Copyright>
     <PackageProjectUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore</PackageProjectUrl>
     <RepositoryUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -41,7 +41,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,6 +49,10 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\OYMLCN.Extension\OYMLCN.Extension\OYMLCN.Extension.csproj" />
   </ItemGroup>
 
 </Project>
