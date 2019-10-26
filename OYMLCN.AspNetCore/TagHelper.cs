@@ -80,6 +80,31 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
         }
     }
 
+    [HtmlTargetElement("*", Attributes = "all-class-data")]
+    [HtmlTargetElement("*", Attributes = "class-*")]
+    public class ClassNameAppendTagHelper : LayuiThisTagHelper
+    {
+        /// <summary>
+        /// 根据条件添加class
+        /// </summary>
+        [HtmlAttributeName("all-class-data", DictionaryAttributePrefix = "class-")]
+        public IDictionary<string, bool?> RouteValues { get; set; } = new Dictionary<string, bool?>();
+
+        /// <summary>
+        /// Process
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="output"></param>
+        public override void Process(TagHelperContext context, TagHelperOutput output)
+        {
+            foreach (var cn in RouteValues)
+                if (cn.Value == true)
+                    output.AddClass(cn.Key);
+            base.Process(context, output);
+        }
+    }
+
+
 #if NETCOREAPP3_0
     [HtmlTargetElement("link", Attributes = "href,auto-use-minify")]
     public class LinkAutoUseMinifyHelper : TagHelper

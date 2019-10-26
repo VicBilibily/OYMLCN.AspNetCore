@@ -9,6 +9,8 @@ using OYMLCN.Extensions;
 using System.Net;
 using OYMLCN.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 
 namespace Microsoft.Extensions.Configuration
 {
@@ -60,6 +62,31 @@ namespace Microsoft.Extensions.Configuration
 
             return services;
         }
+#if NETCOREAPP3_0
+        /// <summary>
+        /// 添加字符转化器，以避免中文被编码
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddHtmlEncoder(this IServiceCollection services)
+            => services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
+        /// <summary>
+        /// 添加自定义的默认JSON序列化配置
+        /// </summary>
+        /// <param name="mvcBuilder"></param>
+        /// <returns></returns>
+        public static IMvcBuilder AddDefaultJsonOptions(this IMvcBuilder mvcBuilder)
+        {
+            var defaultOptions = JsonExtensions.DefaultOptions;
+            mvcBuilder.AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.WriteIndented = defaultOptions.WriteIndented;
+                options.JsonSerializerOptions.IgnoreNullValues = defaultOptions.IgnoreNullValues;
+                options.JsonSerializerOptions.Encoder = defaultOptions.Encoder;
+            });
+            return mvcBuilder;
+        }
+#endif
     }
 }
 namespace Microsoft.AspNetCore.Builder

@@ -11,16 +11,8 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
     [HtmlTargetElement("li", Attributes = "layui-this-controller")]
     [HtmlTargetElement("dd", Attributes = "layui-this-controller,layui-this-action")]
     [HtmlTargetElement("dd", Attributes = "layui-this-controller,layui-this-action")]
-    [HtmlTargetElement("a", Attributes = "layui-this")]
-    [HtmlTargetElement("a", Attributes = "asp-all-route-data,layui-all-route-data")]
-    [HtmlTargetElement("a", Attributes = "asp-route-*,layui-route-*")]
     public class LayuiThisTagHelper : ViewContextTagHelper
     {
-        /// <summary>
-        /// layui-this
-        /// </summary>
-        [HtmlAttributeName("layui-this")]
-        public bool? LayuiThis { get; set; }
         /// <summary>
         /// layui-this-controller
         /// </summary>
@@ -31,6 +23,35 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
         /// </summary>
         [HtmlAttributeName("layui-this-action")]
         public string Action { get; set; }
+
+        /// <summary>
+        /// Process
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="output"></param>
+        public override void Process(TagHelperContext context, TagHelperOutput output)
+        {
+            if (IsEqualController(Controller) && (Action.IsNullOrEmpty() || IsEqualAction(Action)))
+                output.AddClass("layui-this");
+            base.Process(context, output);
+        }
+
+    }
+
+    /// <summary>
+    /// layui-this 添加 href 地址
+    /// </summary>
+    [HtmlTargetElement("a", Attributes = "layui-this")]
+    [HtmlTargetElement("a", Attributes = "asp-all-route-data,layui-all-route-data")]
+    [HtmlTargetElement("a", Attributes = "asp-route-*,layui-route-*")]
+    [HtmlTargetElement("a", Attributes = "layui-this-controller")]
+    public class AnchorLayuiThisTagHelper : LayuiThisTagHelper
+    {
+        /// <summary>
+        /// layui-this
+        /// </summary>
+        [HtmlAttributeName("layui-this")]
+        public bool? LayuiThis { get; set; }
 
         /// <summary>
         /// asp-all-route-data
@@ -55,29 +76,7 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
             }
             return true;
         }
-        /// <summary>
-        /// Process
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="output"></param>
-        public override void Process(TagHelperContext context, TagHelperOutput output)
-        {
-            if (LayuiThis == true ||
-                IsEqualController(Controller) && (Action.IsNullOrEmpty() || IsEqualAction(Action)) ||
-                CheckRouteValues()//LayuiRouteValues.Count > 0 && LayuiRouteValues.IsFullEqual(RouteValues)
-                )
-                output.AddClass("layui-this");
-            base.Process(context, output);
-        }
 
-    }
-
-    /// <summary>
-    /// layui-this 添加 href 地址
-    /// </summary>
-    [HtmlTargetElement("a", Attributes = "layui-this-controller")]
-    public class AnchorLayuiThisTagHelper : LayuiThisTagHelper
-    {
         IHtmlGenerator Generator;
         /// <summary>
         /// AnchorLayuiThisTagHelper
@@ -99,6 +98,8 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
                 ViewContext = ViewContext
             };
             aHelper.Process(context, output);
+            if (LayuiThis == true || CheckRouteValues())
+                output.AddClass("layui-this");
             base.Process(context, output);
         }
     }
