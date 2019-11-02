@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using OYMLCN.Extensions;
@@ -42,11 +43,22 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
     /// layui-this 添加 href 地址
     /// </summary>
     [HtmlTargetElement("a", Attributes = "layui-this")]
+    [HtmlTargetElement("a", Attributes = "layui-params")]
+    [HtmlTargetElement("a", Attributes = "layui-all-route-data")]
     [HtmlTargetElement("a", Attributes = "asp-all-route-data,layui-all-route-data")]
+    [HtmlTargetElement("a", Attributes = "asp-all-route-data,layui-route-*")]
+    [HtmlTargetElement("a", Attributes = "asp-route-*,layui-all-route-data")]
     [HtmlTargetElement("a", Attributes = "asp-route-*,layui-route-*")]
     [HtmlTargetElement("a", Attributes = "layui-this-controller")]
+    [HtmlTargetElement("a", Attributes = "layui-this-controller,layui-this-action")]
     public class AnchorLayuiThisTagHelper : LayuiThisTagHelper
     {
+        /// <summary>
+        /// layui-params，需要对比的参数，若不传则默认完全匹配。
+        /// 多个参数用英文 , 号分隔
+        /// </summary>
+        [HtmlAttributeName("layui-params")]
+        public string LayuiParams { get; set; }
         /// <summary>
         /// layui-this
         /// </summary>
@@ -66,7 +78,7 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
 
         private bool CheckRouteValues()
         {
-            if (LayuiRouteValues.Count == 0) return false;
+            if (LayuiRouteValues == null || LayuiRouteValues.Count == 0) return false;
             foreach (var rule in LayuiRouteValues)
             {
                 if (RouteValues.TryGetValue(rule.Key, out string source) && Equals(rule.Value, source))
@@ -91,14 +103,40 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
         /// <param name="output"></param>
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            var aHelper = new AnchorTagHelper(Generator)
+            //var aHelper = new AnchorTagHelper(Generator)
+            //{
+            //    Action = Action,
+            //    Controller = Controller,
+            //    ViewContext = ViewContext
+            //};
+            //aHelper.Process(context, output);
+            var addClass = Convert.ToBoolean(LayuiThis);
+
+            if (Controller.IsNotNullOrEmpty())
+                addClass = IsEqualController(Controller) && (Action.IsNullOrEmpty() || IsEqualAction(Action));
+
+            // 如果未指示需要添加样式，尝试对比参数
+            if (!addClass)
             {
-                Action = Action,
-                Controller = Controller,
-                ViewContext = ViewContext
-            };
-            aHelper.Process(context, output);
-            if (LayuiThis == true || CheckRouteValues())
+                // 是否有指定对比参数，没有的话全部进行匹配
+                if (LayuiParams.IsNullOrWhiteSpace())
+                    addClass = CheckRouteValues();
+                else
+                {
+                    // 如果指定了匹配参数，进行参数匹配
+                    int matched = 0;
+                    var paramArr = LayuiParams.SplitAuto();
+                    foreach (var key in paramArr)
+                    {
+                        if (RouteValues.TryGetValue(key, out string route) &&
+                            LayuiRouteValues.TryGetValue(key, out string source) &&
+                            Equals(route, source))
+                            matched++;
+                    }
+                    addClass = matched == paramArr.Length;
+                }
+            }
+            if (addClass)
                 output.AddClass("layui-this");
             base.Process(context, output);
         }

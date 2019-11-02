@@ -22,6 +22,7 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
         /// </summary>
         /// <param name="controller"></param>
         /// <returns></returns>
+        [Obsolete("有待兼容3.0")]
         public bool IsEqualController(string controller) => controller.IsEqual(ViewContext.RouteData.Values["controller"]?.ToString());
         /// <summary>
         /// 传入属性值对比是否等于当前请求的Controller
