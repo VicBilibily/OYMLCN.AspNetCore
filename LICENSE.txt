@@ -1,6 +1,6 @@
 The MIT License
 
-Copyright (c) 2008-2019 VicBilibily, OYMLCN. https://git.oyml.cn/VicBilibily
+Copyright (c) 2008-2019 VicBilibily, OYMLCN. https://www.oyml.cn
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

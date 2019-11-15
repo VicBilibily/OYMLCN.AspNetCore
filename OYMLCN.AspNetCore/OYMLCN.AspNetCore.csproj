@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OYMLCN.Extension" Version="2.0.4" />
+    <PackageReference Include="OYMLCN.Extension" Version="2.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.App" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
   </ItemGroup>
 
@@ -36,5 +36,4 @@
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
-
 </Project>

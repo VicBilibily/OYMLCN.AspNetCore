@@ -9,21 +9,54 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
     /// <summary>
     /// layui-this
     /// </summary>
-    [HtmlTargetElement("li", Attributes = "layui-this-controller")]
-    [HtmlTargetElement("dd", Attributes = "layui-this-controller,layui-this-action")]
-    [HtmlTargetElement("dd", Attributes = "layui-this-controller,layui-this-action")]
+    [HtmlTargetElement("li", Attributes = "layui-this")]
+    [HtmlTargetElement("dd", Attributes = "layui-this")]
+    [HtmlTargetElement("li", Attributes = "asp-action,auto-this")]
+    [HtmlTargetElement("dd", Attributes = "asp-action,auto-this")]
+    [HtmlTargetElement("li", Attributes = "asp-controller,asp-action")]
+    [HtmlTargetElement("dd", Attributes = "asp-controller,asp-action")]
     public class LayuiThisTagHelper : ViewContextTagHelper
     {
         /// <summary>
-        /// layui-this-controller
+        /// asp-area
         /// </summary>
-        [HtmlAttributeName("layui-this-controller")]
+        [HtmlAttributeName("asp-area")]
+        public string Area { get; set; }
+        /// <summary>
+        /// asp-controller
+        /// </summary>
+        [HtmlAttributeName("asp-controller")]
         public string Controller { get; set; }
         /// <summary>
-        /// layui-this-action
+        /// asp-action
         /// </summary>
-        [HtmlAttributeName("layui-this-action")]
+        [HtmlAttributeName("asp-action")]
         public string Action { get; set; }
+
+        /// <summary>
+        /// auto-this
+        /// 根据当前asp-action及路由action匹配，如果跨控制器请提供asp-controller，跨区域请提供asp-area
+        /// </summary>
+        [HtmlAttributeName("auto-this")]
+        public bool? AutoThis { get; set; }
+
+        /// <summary>
+        /// layui-this
+        /// </summary>
+        [HtmlAttributeName("layui-this")]
+        public bool? LayuiThis { get; set; }
+
+        /// <summary>
+        /// 是当前请求方法
+        /// </summary>
+        protected bool ActionCatch
+        {
+            get
+            {
+                bool catched = IsEqualAction(Action, Controller);
+                return Area.IsNullOrWhiteSpace() ? catched : IsEqualArea(Area);
+            }
+        }
 
         /// <summary>
         /// Process
@@ -32,7 +65,7 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
         /// <param name="output"></param>
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            if (IsEqualController(Controller) && (Action.IsNullOrEmpty() || IsEqualAction(Action)))
+            if (LayuiThis == true || AutoThis == true && ActionCatch)
                 output.AddClass("layui-this");
             base.Process(context, output);
         }
@@ -49,8 +82,8 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
     [HtmlTargetElement("a", Attributes = "asp-all-route-data,layui-route-*")]
     [HtmlTargetElement("a", Attributes = "asp-route-*,layui-all-route-data")]
     [HtmlTargetElement("a", Attributes = "asp-route-*,layui-route-*")]
-    [HtmlTargetElement("a", Attributes = "layui-this-controller")]
-    [HtmlTargetElement("a", Attributes = "layui-this-controller,layui-this-action")]
+    [HtmlTargetElement("a", Attributes = "asp-action,auto-this")]
+    [HtmlTargetElement("a", Attributes = "asp-action,layui-this")]
     public class AnchorLayuiThisTagHelper : LayuiThisTagHelper
     {
         /// <summary>
@@ -59,11 +92,6 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
         /// </summary>
         [HtmlAttributeName("layui-params")]
         public string LayuiParams { get; set; }
-        /// <summary>
-        /// layui-this
-        /// </summary>
-        [HtmlAttributeName("layui-this")]
-        public bool? LayuiThis { get; set; }
 
         /// <summary>
         /// asp-all-route-data
@@ -89,12 +117,12 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
             return true;
         }
 
-        IHtmlGenerator Generator;
-        /// <summary>
-        /// AnchorLayuiThisTagHelper
-        /// </summary>
-        /// <param name="generator"></param>
-        public AnchorLayuiThisTagHelper(IHtmlGenerator generator) => Generator = generator;
+        //IHtmlGenerator Generator;
+        ///// <summary>
+        ///// AnchorLayuiThisTagHelper
+        ///// </summary>
+        ///// <param name="generator"></param>
+        //public AnchorLayuiThisTagHelper(IHtmlGenerator generator) => Generator = generator;
 
         /// <summary>
         /// Process
@@ -112,9 +140,8 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
             //aHelper.Process(context, output);
             var addClass = Convert.ToBoolean(LayuiThis);
 
-            if (Controller.IsNotNullOrEmpty())
-                addClass = IsEqualController(Controller) && (Action.IsNullOrEmpty() || IsEqualAction(Action));
-
+            if (!addClass && AutoThis == true)
+                addClass = base.ActionCatch;
             // 如果未指示需要添加样式，尝试对比参数
             if (!addClass)
             {

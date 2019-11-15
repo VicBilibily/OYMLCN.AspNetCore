@@ -16,39 +16,49 @@ namespace Microsoft.AspNetCore.Mvc.TagHelpers
     {
         [ViewContext]
         public ViewContext ViewContext { get; set; }
-
         /// <summary>
         /// 传入属性值对比是否等于当前请求的Controller
         /// </summary>
         /// <param name="controller"></param>
         /// <returns></returns>
-        [Obsolete("有待兼容3.0")]
-        public bool IsEqualController(string controller) => controller.IsEqual(ViewContext.RouteData.Values["controller"]?.ToString());
+        public bool IsEqualController(string controller)
+            => controller.IsEqual(ViewContext.RouteData.Values["controller"]?.ToString());
         /// <summary>
         /// 传入属性值对比是否等于当前请求的Controller
         /// </summary>
         /// <param name="controllers"></param>
         /// <returns></returns>
-        public bool IsEqualControllers(string controllers) => IsEqualControllers(controllers.SplitAuto());
+        public bool IsEqualControllers(string controllers)
+            => IsEqualControllers(controllers.SplitAuto());
         /// <summary>
         /// 传入属性值对比是否等于当前请求的Controller
         /// </summary>
         /// <param name="controllers"></param>
         /// <returns></returns>
-        public bool IsEqualControllers(params string[] controllers) => controllers.Contains(ViewContext.RouteData.Values["controller"]?.ToString());
+        public bool IsEqualControllers(params string[] controllers)
+            => controllers.Contains(ViewContext.RouteData.Values["controller"]?.ToString());
         /// <summary>
         /// 传入属性值对比是否等于当前请求的Action
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        public bool IsEqualAction(string action) => action.IsEqual(ViewContext.RouteData.Values["action"]?.ToString());
+        public bool IsEqualAction(string action)
+            => action.IsEqual(ViewContext.RouteData.Values["action"]?.ToString());
         /// <summary>
         /// 传入属性值对比是否等于当前请求的Action与Controller
         /// </summary>
         /// <param name="action"></param>
         /// <param name="controller"></param>
         /// <returns></returns>
-        public bool IsEqualAction(string action, string controller) => IsEqualController(controller) && IsEqualAction(action);
+        public bool IsEqualAction(string action, string controller)
+            => controller.IsNullOrWhiteSpace() ? IsEqualAction(action) : IsEqualController(controller) && IsEqualAction(action);
+        /// <summary>
+        /// 传入属性值对比是否等于当前请求的Area区域
+        /// </summary>
+        /// <param name="area"></param>
+        /// <returns></returns>
+        public bool IsEqualArea(string area)
+            => area.IsEqual(ViewContext.RouteData.Values["area"]?.ToString());
     }
 
     [HtmlTargetElement("input", Attributes = "asp-checked")]
