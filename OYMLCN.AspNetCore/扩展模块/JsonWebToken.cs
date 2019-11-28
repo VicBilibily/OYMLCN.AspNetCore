@@ -184,7 +184,7 @@ namespace Microsoft.Extensions.Configuration
         /// <param name="clockSkew">宽限时间/时间验证偏差（默认偏差5分钟）</param>
         /// <returns></returns>
         public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services, string secret, string issuer, string audience, string name = JsonWebToken.TokenNameDefault, TimeSpan clockSkew = default(TimeSpan)) =>
-            AddJsonWebTokenAuthentication(services, OYMLCN.AspNetCore.JsonWebToken.CrateSecurityKey(secret), issuer, audience, name, clockSkew);
+            AddJsonWebTokenAuthentication(services, JsonWebToken.CrateSecurityKey(secret), issuer, audience, name, clockSkew);
         /// <summary>
         /// 配置JsonWebToken(JWT)身份验证
         /// 需在Configure中加入 app.UseAuthentication() 以使得登陆配置生效 

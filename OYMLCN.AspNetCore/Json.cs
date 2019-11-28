@@ -25,6 +25,8 @@ namespace OYMLCN.Extensions
             //WriteIndented = true, // 是否格式化
             IgnoreNullValues = true,
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All), // 解决中文格式化的问题
+            DictionaryKeyPolicy = null,
+            PropertyNamingPolicy = null
         };
 
         /// <summary>

@@ -83,6 +83,8 @@ namespace Microsoft.Extensions.Configuration
                 options.JsonSerializerOptions.WriteIndented = defaultOptions.WriteIndented;
                 options.JsonSerializerOptions.IgnoreNullValues = defaultOptions.IgnoreNullValues;
                 options.JsonSerializerOptions.Encoder = defaultOptions.Encoder;
+                options.JsonSerializerOptions.DictionaryKeyPolicy = defaultOptions.DictionaryKeyPolicy;
+                options.JsonSerializerOptions.PropertyNamingPolicy = defaultOptions.PropertyNamingPolicy;
             });
             return mvcBuilder;
         }
