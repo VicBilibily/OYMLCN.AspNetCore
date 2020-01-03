@@ -104,9 +104,18 @@ namespace OYMLCN.AspNetCore
 
 
         /// <summary>
-        /// 上一路径
+        /// 上一来源(Uri)
         /// </summary>
-        public string RefererPath => (Request.Headers as RequestHeaders).Referer?.AbsolutePath;
+        public Uri RefererUri => Request.Headers["Referer"].FirstOrDefault()?.ConvertToUri();
+        /// <summary>
+        /// 上一来源域名
+        /// </summary>
+        public string RefererHost => RefererUri?.Host;
+        /// <summary>
+        /// 上一来源路径
+        /// </summary>
+        public string RefererPath => RefererUri?.AbsolutePath;
+
         /// <summary>
         /// 请求域名
         /// </summary>
