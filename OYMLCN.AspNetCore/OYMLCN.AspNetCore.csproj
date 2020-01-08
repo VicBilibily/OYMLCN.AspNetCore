@@ -5,7 +5,7 @@
     <Company>欧阳敏岚工作室</Company>
     <Authors>VicBilibily欧阳敏岚</Authors>
     <Version>1.3.9</Version>
-    <Description>ASP.Net Core 扩展</Description>
+    <Description>ASP.Net Core 扩展 （最后版本1.3.9，以后将合并到OYMLCN.Extension）</Description>
     <PackageReleaseNotes></PackageReleaseNotes>
     <Copyright>The MIT License</Copyright>
     <PackageProjectUrl>https://github.com/VicBilibily/OYMLCN.AspNetCore</PackageProjectUrl>
