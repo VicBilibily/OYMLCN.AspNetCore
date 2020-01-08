@@ -20,6 +20,12 @@ namespace Microsoft.Extensions.Configuration
     public static partial class StartupConfigureExtensions
     {
         /// <summary>
+        /// 获取已注入的服务实例
+        /// </summary>
+        public static T GetRequiredService<T>(this IServiceCollection services)
+            => services.BuildServiceProvider().GetRequiredService<T>();
+
+        /// <summary>
         /// 一句配置Session和登陆Cookie
         /// 需在Configure中加入 app.UseSessionAndAuthentication() 以使得登陆配置生效 
         /// </summary>

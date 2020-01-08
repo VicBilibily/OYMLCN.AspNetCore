@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
 using OYMLCN.Extensions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 
 namespace OYMLCN.AspNetCore
@@ -46,62 +47,6 @@ namespace OYMLCN.AspNetCore
         /// 登陆用户唯一标识
         /// </summary>
         public long UserId => User.Claims.Where(d => d.Type == ClaimTypes.NameIdentifier).FirstOrDefault()?.Value.ConvertToNullableLong() ?? 0;
-
-        /// <summary>
-        /// 用户登陆
-        /// 需要在 Startup 中配置Session及Cookie基本信息
-        /// services.AddSessionAndCookie();
-        /// app.UseAuthentication();
-        /// </summary>
-        /// <param name="userName">用户名</param>
-        /// <param name="userId">用户ID</param>
-        /// <param name="roles">用户角色</param>
-        /// <param name="claims">其他标识</param>
-        public void UserSignIn(string userName, long userId, string[] roles = null, params Claim[] claims)
-        {
-            var newClaims = claims.ToList();
-            newClaims.Add(new Claim(ClaimTypes.Name, userName));
-            foreach (var role in roles)
-                newClaims.Add(new Claim(ClaimTypes.Role, role));
-            newClaims.Add(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
-
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(
-                    new ClaimsPrincipal(
-                        new ClaimsIdentity(newClaims, CookieAuthenticationDefaults.AuthenticationScheme)
-                        )
-                    )
-                ).Wait();
-        }
-        /// <summary>
-        /// 注销登陆
-        /// </summary>
-        public void UserSignOut() => HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).Wait();
-        /// <summary>
-        /// 用户登陆（将已经生成的JWT身份认证信息写入到Cookie）
-        /// 若要使用Cookie+JWT验证，需要在Startup中配置app.UseJWTAuthenticationWithCookie
-        /// </summary>
-        /// <param name="jwt"></param>
-        /// <param name="secureCookie"></param>
-        /// <param name="options"></param>
-        public void UserSignInWithJWT(JsonWebToken.JwtToken jwt, bool secureCookie = true, CookieOptions options = null)
-        {
-            options = options ?? options ?? new CookieOptions();
-            options.Secure = secureCookie;
-            options.HttpOnly = true;
-            HttpContext.Response.Cookies.Append(jwt.key, jwt.access_token, options);
-        }
-        /// <summary>
-        /// 注销登陆（删除Cookie中的JWT身份凭证）
-        /// </summary>
-        /// <param name="configuration"></param>
-        public void UserSignOutWithJWT(IConfiguration configuration) => Response.Cookies.Delete(configuration.GetValue<string>(JsonWebToken.TokenNamePath) ?? JsonWebToken.TokenNameDefault);
-        /// <summary>
-        /// 注销登陆（删除Cookie中的JWT身份凭证）
-        /// </summary>
-        /// <param name="tokenKey"></param>
-        public void UserSignOutWithJWT(string tokenKey = JsonWebToken.TokenNameDefault) => HttpContext.Response.Cookies.Delete(tokenKey);
-
 
         /// <summary>
         /// 上一来源(Uri)

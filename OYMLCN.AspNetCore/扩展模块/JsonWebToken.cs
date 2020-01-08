@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace OYMLCN.AspNetCore
 {
@@ -161,17 +162,18 @@ namespace Microsoft.Extensions.Configuration
         /// <summary>
         /// 配置JsonWebToken(JWT)身份验证
         /// 需要在配置文件设置JWT->SecretKey/Issuer/Audience/Name
+        /// 需在Configure中加入 app.UseAuthentication() 以使得登陆配置生效 
         /// </summary>
-        /// <param name="services"></param>
-        /// <param name="configuration"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services, IConfiguration configuration) =>
-            AddJsonWebTokenAuthentication(services,
+        public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services)
+        {
+            var configuration = services.GetRequiredService<IConfiguration>();
+            return AddJsonWebTokenAuthentication(services,
                 configuration.GetValue<string>("JWT:SecretKey"),
                 configuration.GetValue<string>("JWT:Issuer"),
                 configuration.GetValue<string>("JWT:Audience"),
                 configuration.GetValue<string>("JWT:Name") ?? JsonWebToken.TokenNameDefault
-                );
+            );
+        }
         /// <summary>
         /// 配置JsonWebToken(JWT)身份验证
         /// 需在Configure中加入 app.UseAuthentication() 以使得登陆配置生效 
@@ -183,8 +185,8 @@ namespace Microsoft.Extensions.Configuration
         /// <param name="name">Token名称</param>
         /// <param name="clockSkew">宽限时间/时间验证偏差（默认偏差5分钟）</param>
         /// <returns></returns>
-        public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services, string secret, string issuer, string audience, string name = JsonWebToken.TokenNameDefault, TimeSpan clockSkew = default(TimeSpan)) =>
-            AddJsonWebTokenAuthentication(services, JsonWebToken.CrateSecurityKey(secret), issuer, audience, name, clockSkew);
+        public static IServiceCollection AddJsonWebTokenAuthentication(this IServiceCollection services, string secret, string issuer, string audience, string name = JsonWebToken.TokenNameDefault, TimeSpan clockSkew = default(TimeSpan))
+            => AddJsonWebTokenAuthentication(services, JsonWebToken.CrateSecurityKey(secret), issuer, audience, name, clockSkew);
         /// <summary>
         /// 配置JsonWebToken(JWT)身份验证
         /// 需在Configure中加入 app.UseAuthentication() 以使得登陆配置生效 
@@ -204,17 +206,16 @@ namespace Microsoft.Extensions.Configuration
                 {
                     options.Events = new JwtBearerEvents()
                     {
+                        // 注册自定义token获取方式
                         OnMessageReceived = context =>
                         {
-                            //仅未通过Header传入时才从其他方式获取
-                            if (context.Token.IsNullOrEmpty())
-                            {
-                                //首先尝试从Cookie中获取Token
-                                string token = context.Request.Cookies[name];
-                                //如果无，则尝试参数从中获取Token
-                                if (token.IsNullOrEmpty()) token = context.Request.Query[name];
-                                if (token.IsNotNullOrEmpty()) context.Token = token;
-                            }
+                            // 首先尝试从Cookie中获取Token
+                            string token = context.Request.Cookies[name];
+                            // 如果无，则尝试参数从中获取Token
+                            if (token.IsNullOrEmpty()) token = context.Request.Query[name];
+                            // 执行完毕，把取得的值设置为token
+                            // 如果为空原始方式会从Header重新获取
+                            context.Token = token;
                             return Task.CompletedTask;
                         }
                     };
