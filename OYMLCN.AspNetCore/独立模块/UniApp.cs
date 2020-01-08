@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using OYMLCN.AspNetCore;
 using OYMLCN.Extensions;
+using OYMLCN.Helpers;
 
 namespace OYMLCN.AspNetCore
 {
@@ -63,16 +64,28 @@ namespace OYMLCN.AspNetCore
         /// <summary>
         /// 添加路径映射
         /// </summary>
-        /// <param name="pagePath">UniApp Page路径 (eg:/pages/home)</param>
-        /// <param name="actionPath">PC端网站Action完整路径（eg:/Home/Index）</param>
+        /// <param name="pagePath">UniApp Page路径（eg:/pages/home）[不区分大小写]</param>
+        /// <param name="actionPath">PC端网站Action完整路径（eg:/Home/Index）[不区分大小写]</param>
         /// <returns></returns>
         public MapInfo AddMap(string pagePath, string actionPath)
         {
             var map = new MapInfo();
-            map.PagePath = pagePath;
-            map.ActionPath = actionPath;
+            map.PagePath = pagePath.ToLower();
+            map.ActionPath = actionPath.ToLower();
             MapsList.Add(map);
             return map;
+        }
+        internal List<string> IgnorePaths = new List<string>();
+
+        /// <summary>
+        /// 添加要忽略处理的路径（eg:/api）[不区分大小写]
+        /// </summary>
+        /// <param name="paths">忽略处理的路径（eg:/api）[不区分大小写]</param>
+        /// <returns></returns>
+        public UniAppPageOptions AddIgnorePath(params string[] paths)
+        {
+            IgnorePaths.AddRange(paths.Select(v => v.ToLower()));
+            return this;
         }
 
         /// <summary>
@@ -100,15 +113,15 @@ namespace OYMLCN.AspNetCore
             /// <summary>
             /// 添加页面参数映射
             /// </summary>
-            /// <param name="queryName">参数名称（UniApp和PC参数名一致）</param>
+            /// <param name="queryName">参数名称（UniApp和PC参数名一致）[区分大小写]</param>
             /// <returns></returns>
             public MapInfo AddQueryMap(string queryName)
                 => AddQueryMap(queryName, queryName);
             /// <summary>
             /// 添加页面参数映射
             /// </summary>
-            /// <param name="pageQueryName">UniApp Page 路径参数</param>
-            /// <param name="actionQueryName">PC端网站Action 路径参数，如果在路由路径而不是参数传递，填写 [0] 表示匹配路径后的第1个匹配路由参数</param>
+            /// <param name="pageQueryName">[区分大小写] UniApp Page 路径参数</param>
+            /// <param name="actionQueryName">[区分大小写] PC端网站Action 路径参数，如果在路由路径而不是参数传递，填写 [0] 表示匹配路径后的第1个匹配路由参数</param>
             /// <returns></returns>
             public MapInfo AddQueryMap(string pageQueryName, string actionQueryName)
             {
@@ -135,8 +148,12 @@ namespace OYMLCN.AspNetCore
         }
         public Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            string requestPath = context.Request.Path.Value;
-            var requestQuery = OYMLCN.Helpers.FormatHelpers.QueryStringToDictionary(context.Request.QueryString.Value ?? string.Empty);
+            string requestPath = context.Request.Path.Value.ToLower();
+            // 忽略处理的路径直接移交给下一处理管道
+            if (_options.IgnorePaths.Any(v => requestPath.StartsWith(v)))
+                return next(context);
+
+            var requestQuery = FormatHelpers.QueryStringToDictionary(context.Request.QueryString.Value ?? string.Empty);
 
             // 获取浏览器代理字符串以判断是否是手机访问
             string userAgent = context.Request.Headers[HeaderNames.UserAgent];
@@ -152,7 +169,7 @@ namespace OYMLCN.AspNetCore
                         context.Request.Host.Value != _options.PageHost.ConvertToUri()?.Host)
                     {
                         context.Response.Redirect(_options.PageHost + requestPath + context.Request.QueryString);
-                        return context.Response.WriteAsync("");
+                        return Task.CompletedTask;
                     }
                 }
 
@@ -162,7 +179,7 @@ namespace OYMLCN.AspNetCore
                     if (requestPath == "/")
                     {
                         context.Response.Redirect(_options.WebHost);
-                        return context.Response.WriteAsync("");
+                        return Task.CompletedTask;
                     }
                     // 尝试匹配检查存在设置的映射
                     var match = _options.MapsList.Where(v => v.PagePath.IsNotNullOrEmpty()).FirstOrDefault(v => requestPath == v.PagePath);
@@ -193,7 +210,7 @@ namespace OYMLCN.AspNetCore
                             actionUrl = $"{actionUrl}?{queryDic.ToQueryString()}";
 
                         context.Response.Redirect(_options.WebHost + actionUrl);
-                        return context.Response.WriteAsync("");
+                        return Task.CompletedTask;
                     }
                 }
 
@@ -207,9 +224,8 @@ namespace OYMLCN.AspNetCore
             if (isMobile)
             {
                 // 匹配PC页面映射
-                var match = _options.MapsList.Where(v => v.ActionPath.IsNotNullOrEmpty())
-                    .OrderBy(v => v.ActionPath)
-                    .FirstOrDefault(v => v.ActionPath.StartsWith(requestPath));
+                var match = _options.MapsList.Where(v => v.ActionPath.IsNotNullOrEmpty()).FirstOrDefault(v => requestPath == v.ActionPath)
+                    ?? _options.MapsList.Where(v => v.ActionPath.IsNotNullOrEmpty() && v.ActionMaps.Any(d => d.Key.StartsWith('[') && d.Key.EndsWith(']'))).FirstOrDefault(v => requestPath.StartsWith(v.ActionPath));
                 if (match != null)
                 {
                     // 根据映射参数构造 UniApp Page 对应是页面参数
@@ -236,7 +252,7 @@ namespace OYMLCN.AspNetCore
                         pageUrl = $"{pageUrl}?{queryDic.ToQueryString()}";
                     // 实施跳转
                     context.Response.Redirect(_options.PageHost + pageUrl);
-                    return context.Response.WriteAsync("");
+                    return Task.CompletedTask;
                 }
             }
 
